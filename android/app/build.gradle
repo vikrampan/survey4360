@@ -1,0 +1,46 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "com.google.gms.google-services"  // Add this line
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.quality4360.s"  // Update to match Firebase package name
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId = "com.quality4360.s"  // Update to match Firebase package name
+        minSdk = 21  // Set minimum to 21 for Firebase
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    // Add Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    // Add Firebase Analytics
+    implementation 'com.google.firebase:firebase-analytics'
+}
