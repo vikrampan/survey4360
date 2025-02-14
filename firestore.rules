@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Function to check if user is surveyor
+    function isSurveyor() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'surveyor';
+    }
+
+    // Function to check if user is nest admin
+    function isNestAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'nest_admin';
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() || isAdmin() || isNestAdmin();
+    }
+
+    // Projects collection
+    match /projects/{projectId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isNestAdmin();
+      allow update: if isAdmin() || isNestAdmin() || isSurveyor();
+    }
+
+    // Survey templates collection
+    match /survey_templates/{templateId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isNestAdmin();
+      allow update: if isAdmin() || isNestAdmin();
+    }
+
+    // Surveys collection
+    match /surveys/{surveyId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isNestAdmin();
+      allow update: if isAdmin() || isNestAdmin() || isSurveyor();
+    }
+
+    // Survey responses collection
+    match /survey_responses/{responseId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isNestAdmin() || isSurveyor();
+      allow update: if isAdmin() || isNestAdmin() || isSurveyor();
+    }
+
+    // Survey assignments collection
+    match /survey_assignments/{assignmentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isNestAdmin();
+      allow update: if isAdmin() || isNestAdmin() || isSurveyor();
+    }
+
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
